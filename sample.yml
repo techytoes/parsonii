@@ -1,0 +1,44 @@
+api:
+  resources:
+    - name: "users"
+      versioning:
+        - version: 1
+          requests:
+            - path: "/"
+              method: "GET"
+              params: 
+                - alias: "id"
+                  type: "int"
+                  is_optional: false  #throw 4xx incase of these. this could help with basic level of validations.
+                - alias: "name"
+                  type: "string"
+                  is_optional: true
+
+              body:
+                - alias: "id"
+                  type: "int"
+                  is_optional: false  #throw 4xx incase of these. this could help with basic level of validations.
+                - alias: "name"
+                  type: "string"
+                  is_optional: true
+              
+              db:
+                query_input: ["id", "name"]
+                query_output: ["photo", "password", "name"]
+                post_logic: ["get_first"]  # create these functions and then these can be cascaded together to create desired output from db responses
+                return_name: "queried_user"
+
+              response:
+                precheck:
+                  alias: "queried_user"
+                  checks: ["is_not_empty", "is_active_user"]
+                returns:
+                  - type: "string"
+                    alias: "name"
+                    value: "queried_user.name"
+                  - type: "string"
+                    alias: "photo_url"
+                    value: "queried_user.photo"
+                  - type: "string"
+                    alias: "password"
+                    value: "queried_user.password"
